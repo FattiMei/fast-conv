@@ -121,20 +121,21 @@ void compute_new_line_full_reuse(const int n, const Cell above[], Cell below[], 
 
 template <typename Integer>
 void compute_new_line_packed(const int n, const Cell above[], Cell below[], const int rule) {
-	constexpr int LANE_WIDTH = 8 * sizeof(Integer);
+	constexpr int SIZEOF = sizeof(Integer);
+	constexpr int LANE_WIDTH = 8 * SIZEOF;
 	Integer vector, acc, left = 0, right;
 	int i, number;
 
-	for (i = 0; i+sizeof(Integer) < n; i += sizeof(Integer)) {
+	for (i = 0; i+SIZEOF < n; i += SIZEOF) {
 		vector = *((Integer *) (above + i));
-		right = above[i+sizeof(Integer)];
+		right = above[i+SIZEOF];
 
 		acc =
 			  (((vector << 8) | left) << 2)
 			+ (vector << 1)
 			+ ((vector >> 8) | (right << (LANE_WIDTH - 8)));
 
-		for (int j = 0; j < sizeof(Integer); ++j) {
+		for (int j = 0; j < SIZEOF; ++j) {
 			number = acc & 0xFF;
 			below[i+j] = (rule >> number) % 2;
 
@@ -146,7 +147,7 @@ void compute_new_line_packed(const int n, const Cell above[], Cell below[], cons
 
 	// at this point we are on a cell with a sure left neighbour
 	// we simply copy an existing implementation
-	Cell local[3] = {left, above[i], 0};
+	Cell local[3] = {static_cast<Cell>(left), above[i], 0};
 
 	for (; i < n-1; ++i) {
 		local[2] = above[i+1];
