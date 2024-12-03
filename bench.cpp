@@ -7,6 +7,7 @@
 template <void (*fcn)(const int n, const Cell[], Cell [], const int)>
 static void BM_automata_step(benchmark::State &state) {
 	const int n = state.range(0) + 1;
+	const int rule = std::rand() % 256;
 
 	std::vector<Cell> line(n);
 	std::vector<Cell> temp(n);
@@ -16,19 +17,16 @@ static void BM_automata_step(benchmark::State &state) {
 	}
 
 	for (auto _ : state) {
-		fcn(n, line.data(), temp.data(), 103);
+		fcn(n, line.data(), temp.data(), rule);
 		line.swap(temp);
 	}
 }
 
-BENCHMARK_TEMPLATE(BM_automata_step, compute_new_line_reference)->RangeMultiplier(2)->Range(64, 1<<20);
-BENCHMARK_TEMPLATE(BM_automata_step, compute_new_line_branchless)->RangeMultiplier(2)->Range(64, 1<<20);
 BENCHMARK_TEMPLATE(BM_automata_step, compute_new_line_corner_cases)->RangeMultiplier(2)->Range(64, 1<<20);
-BENCHMARK_TEMPLATE(BM_automata_step, compute_new_line_reuse)->RangeMultiplier(2)->Range(64, 1<<20);
-BENCHMARK_TEMPLATE(BM_automata_step, compute_new_line_full_reuse)->RangeMultiplier(2)->Range(64, 1<<20);
-BENCHMARK_TEMPLATE(BM_automata_step, compute_new_line_reuse_lower_bound)->RangeMultiplier(2)->Range(64, 1<<20);
-BENCHMARK_TEMPLATE(BM_automata_step, compute_new_line_simd<2>)->RangeMultiplier(2)->Range(64, 1<<20);
-BENCHMARK_TEMPLATE(BM_automata_step, compute_new_line_simd<4>)->RangeMultiplier(2)->Range(64, 1<<20);
-BENCHMARK_TEMPLATE(BM_automata_step, compute_new_line_simd<8>)->RangeMultiplier(2)->Range(64, 1<<20);
+BENCHMARK_TEMPLATE(BM_automata_step, compute_new_line_reuse       )->RangeMultiplier(2)->Range(64, 1<<20);
+BENCHMARK_TEMPLATE(BM_automata_step, compute_new_line_full_reuse  )->RangeMultiplier(2)->Range(64, 1<<20);
+BENCHMARK_TEMPLATE(BM_automata_step, compute_new_line_simd<2>     )->RangeMultiplier(2)->Range(64, 1<<20);
+BENCHMARK_TEMPLATE(BM_automata_step, compute_new_line_simd<4>     )->RangeMultiplier(2)->Range(64, 1<<20);
+BENCHMARK_TEMPLATE(BM_automata_step, compute_new_line_simd<8>     )->RangeMultiplier(2)->Range(64, 1<<20);
 
 BENCHMARK_MAIN();

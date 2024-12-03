@@ -16,7 +16,7 @@ def get_time_unit(unit):
 
 def process_benchmark(benchmark):
     name, n = re.findall(
-        r'BM_automata_step<(.*)>/(.*)',
+        r'BM_automata_step<compute_new_line_(.*)>/(.*)',
         benchmark['name']
     )[0]
 
@@ -80,7 +80,7 @@ if __name__ == '__main__':
 
 
     # -------------------------------speedup plot ------------------------------
-    reference = results['compute_new_line_reference']['throughput']
+    reference = results['corner_cases']['throughput']
 
     plt.title("implementation speedup")
     plt.xlabel("size [elements]")
