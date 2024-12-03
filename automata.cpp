@@ -74,7 +74,7 @@ void compute_new_line_full_reuse(const int n, const Cell above[], Cell below[], 
 	Cell local[3] = {0, above[0], 0};
 	int i, number;
 
-	for (i = 0; i <= n-3; i += 3) {
+	for (i = 0; i < n-3; i += 3) {
 		local[2] = above[i+1];
 		number = 4*local[0] + 2*local[1] + 1*local[2];
 		below[i] = (rule >> number) % 2;
