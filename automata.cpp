@@ -128,18 +128,18 @@ void compute_new_line_packed(const int n, const Cell above[], Cell below[], cons
 		right = above[i+4];
 
 		acc =
-			  (((vector >> 8) | (left << 24)) << 2)
+			  (((vector << 8) | left) << 2)
 			+ (vector << 1)
-			+ (((vector << 8) | right));
+			+ ((vector >> 8) | (right << 24));
 
 		for (int j = 0; j < 4; ++j) {
-			number = (acc >> 24) % 256;
+			number = acc & 0xFF;
 			below[i+j] = (rule >> number) % 2;
 
-			acc = acc << 8;
+			acc = acc >> 8;
 		}
 
-		left = vector % 256;
+		left = vector >> 24;
 	}
 
 	// at this point we are on a cell with a sure left neighbour
