@@ -1,7 +1,7 @@
 CXX      = g++
 PYTHON   = python3
 WARNINGS = -Wall -Wextra -Wpedantic
-OPT      = -O2
+OPT      = -O3 -ftree-vectorize
 
 
 all: test wolf
@@ -31,7 +31,7 @@ build/%.o: %.cpp
 	$(CXX) -c -o $@ $^ $(WARNINGS) $(OPT)
 
 
-build/automata.s: automata.cpp
+automata.s: automata.cpp
 	$(CXX) -S -o $@ $^ $(WARNINGS) $(OPT)
 
 

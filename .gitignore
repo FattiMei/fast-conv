@@ -3,3 +3,4 @@ benchmark
 regression
 wolf
 *.json
+automata.s
