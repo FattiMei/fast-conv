@@ -119,27 +119,29 @@ void compute_new_line_full_reuse(const int n, const Cell above[], Cell below[], 
 }
 
 
+template <typename Integer>
 void compute_new_line_packed(const int n, const Cell above[], Cell below[], const int rule) {
-	int32_t vector, acc, left = 0, right;
+	constexpr int LANE_WIDTH = 8 * sizeof(Integer);
+	Integer vector, acc, left = 0, right;
 	int i, number;
 
-	for (i = 0; i+4 < n; i += 4) {
-		vector = *((int32_t *) (above + i));
-		right = above[i+4];
+	for (i = 0; i+sizeof(Integer) < n; i += sizeof(Integer)) {
+		vector = *((Integer *) (above + i));
+		right = above[i+sizeof(Integer)];
 
 		acc =
 			  (((vector << 8) | left) << 2)
 			+ (vector << 1)
-			+ ((vector >> 8) | (right << 24));
+			+ ((vector >> 8) | (right << (LANE_WIDTH - 8)));
 
-		for (int j = 0; j < 4; ++j) {
+		for (int j = 0; j < sizeof(Integer); ++j) {
 			number = acc & 0xFF;
 			below[i+j] = (rule >> number) % 2;
 
 			acc = acc >> 8;
 		}
 
-		left = vector >> 24;
+		left = vector >> (LANE_WIDTH - 8);
 	}
 
 	// at this point we are on a cell with a sure left neighbour
@@ -161,75 +163,5 @@ void compute_new_line_packed(const int n, const Cell above[], Cell below[], cons
 }
 
 
-template <int UNROLL_FACTOR>
-void compute_new_line_simd(const int n, const Cell above[], Cell below[], const int rule) {
-	Cell acc[UNROLL_FACTOR];
-	Cell shift[UNROLL_FACTOR];
-	Cell buffer[UNROLL_FACTOR];
-	Cell left = 0, right;
-
-	int i;
-	for (i = 0; i+UNROLL_FACTOR < n; i += UNROLL_FACTOR) {
-		// all this loops are not fused to help the compiler with the vectorization
-		for (int j = 0; j < UNROLL_FACTOR; ++j) {
-			acc[j] = 0;
-		}
-
-		for (int j = 0; j < UNROLL_FACTOR; ++j) {
-			buffer[j] = above[i+j];
-		}
-
-		right = above[i+UNROLL_FACTOR];
-
-		for (int j = 0; j < UNROLL_FACTOR; ++j) {
-			acc[j] += 2*buffer[j];
-		}
-
-		for (int j = UNROLL_FACTOR-1; j > 0; --j) {
-			shift[j] = buffer[j-1];
-		}
-		shift[0] = left;
-
-		for (int j = 0; j < UNROLL_FACTOR; ++j) {
-			acc[j] += 4*shift[j];
-		}
-
-		for (int j = 0; j < UNROLL_FACTOR-1; ++j) {
-			shift[j] = buffer[j+1];
-		}
-		shift[UNROLL_FACTOR-1] = right;
-
-		for (int j = 0; j < UNROLL_FACTOR; ++j) {
-			acc[j] += 1*shift[j];
-		}
-
-		for (int j = 0; j < UNROLL_FACTOR; ++j) {
-			below[i+j] = (rule >> acc[j]) % 2;
-		}
-
-		left = buffer[UNROLL_FACTOR-1];
-	}
-
-	// at this point we are on a cell with a sure left neighbour and less than UNROLL_FACTOR cells at its right
-	// we simply copy an existing implementation
-	Cell local[3] = {left, above[i], 0};
-	int number;
-
-	for (; i < n-1; ++i) {
-		local[2] = above[i+1];
-
-		number = 4*local[0] + 2*local[1] + 1*local[2];
-		below[i] = (rule >> number) % 2;
-
-		local[0] = local[1];
-		local[1] = local[2];
-	}
-
-	number = 4*local[0] + 2*local[1];
-	below[n-1] = (rule >> number) % 2;
-}
-
-
-template void compute_new_line_simd<2>(const int, const Cell[], Cell[], const int);
-template void compute_new_line_simd<4>(const int, const Cell[], Cell[], const int);
-template void compute_new_line_simd<8>(const int, const Cell[], Cell[], const int);
+template void compute_new_line_packed<int32_t>(const int, const Cell[], Cell[], const int);
+template void compute_new_line_packed<int64_t>(const int, const Cell[], Cell[], const int);

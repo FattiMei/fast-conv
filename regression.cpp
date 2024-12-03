@@ -69,6 +69,8 @@ int main() {
 	TEST_IMPLEMENTATION(compute_new_line_corner_cases);
 	TEST_IMPLEMENTATION(compute_new_line_reuse);
 	TEST_IMPLEMENTATION(compute_new_line_full_reuse);
+	TEST_IMPLEMENTATION(compute_new_line_packed<int32_t>);
+	TEST_IMPLEMENTATION(compute_new_line_packed<int64_t>);
 
 	return 0;
 }
