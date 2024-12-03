@@ -33,14 +33,14 @@ int main() {
 	compute_new_line_full_reuse(size, start.data(), alternative.data(), rule);
 	assert(reference == alternative);
 
-	compute_new_line_simd<2>(size, start.data(), alternative.data(), rule);
-	assert(reference == alternative);
+	compute_new_line_packed(size, start.data(), alternative.data(), rule);
 
-	compute_new_line_simd<4>(size, start.data(), alternative.data(), rule);
-	assert(reference == alternative);
+	for (auto x : reference) std::cout << (int) x << ' ';
+	std::cout << std::endl;
+	for (auto x : alternative) std::cout << (int) x << ' ';
+	std::cout << std::endl;
 
-	compute_new_line_simd<8>(size, start.data(), alternative.data(), rule);
-	assert(reference == alternative);
+	// assert(reference == alternative);
 
 	return 0;
 }

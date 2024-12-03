@@ -119,19 +119,41 @@ void compute_new_line_full_reuse(const int n, const Cell above[], Cell below[], 
 }
 
 
-void compute_new_line_reuse_lower_bound(const int n, const Cell above[], Cell below[], const int rule) {
-	Cell local[3] = {0, above[0], 0};
-	int number;
+void compute_new_line_packed(const int n, const Cell above[], Cell below[], const int rule) {
+	int32_t vector, acc, left = 0, right;
+	int i, number;
 
-	for (int i = 0; i < n-1; ++i) {
+	for (i = 0; i+4 < n; i += 4) {
+		vector = *((int32_t *) (above + i));
+		right = above[i+4];
+
+		acc =
+			  (((vector >> 8) | (left << 24)) << 2)
+			+ (vector << 1)
+			+ (((vector << 8) | right));
+
+		for (int j = 0; j < 4; ++j) {
+			number = (acc >> 24) % 256;
+			below[i+j] = (rule >> number) % 2;
+
+			acc = acc << 8;
+		}
+
+		left = vector % 256;
+	}
+
+	// at this point we are on a cell with a sure left neighbour
+	// we simply copy an existing implementation
+	Cell local[3] = {left, above[i], 0};
+
+	for (; i < n-1; ++i) {
 		local[2] = above[i+1];
 
 		number = 4*local[0] + 2*local[1] + 1*local[2];
 		below[i] = (rule >> number) % 2;
 
-		// those copies can be omitted by carefully unrolling the loop
-		// local[0] = local[1];
-		// local[1] = local[2];
+		local[0] = local[1];
+		local[1] = local[2];
 	}
 
 	number = 4*local[0] + 2*local[1];
@@ -144,10 +166,9 @@ void compute_new_line_simd(const int n, const Cell above[], Cell below[], const 
 	Cell acc[UNROLL_FACTOR];
 	Cell shift[UNROLL_FACTOR];
 	Cell buffer[UNROLL_FACTOR];
+	Cell left = 0, right;
 
-	int left = 0, right;
 	int i;
-
 	for (i = 0; i+UNROLL_FACTOR < n; i += UNROLL_FACTOR) {
 		// all this loops are not fused to help the compiler with the vectorization
 		for (int j = 0; j < UNROLL_FACTOR; ++j) {
