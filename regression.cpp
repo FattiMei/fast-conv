@@ -5,38 +5,61 @@
 #include "automata.hpp"
 
 
-#define TEST_IMPLEMENTATION(foo) assert(test_implementation(foo))
+#define TEST_IMPLEMENTATION(foo) assert(test_suite(foo, #foo))
 
 
 constexpr int size = 100;
 constexpr int rule = 103;
-using Line = std::vector<Cell>;
 
 
-bool test_implementation(void (*impl) (const int, const Cell[], Cell[], const int)) {
-	Line start(size);
-	Line reference(size);
-	Line alternative(size);
+Cell start[size];
+Cell reference[size];
+Cell alternative[size];
 
-	for (int n = 3; n < size; ++n) {
-		const int rule = std::rand() % 256;
 
-		for (int i = 0; i < size; ++i) {
-			start[i] = std::rand() % 2;
-		}
+bool single_test_case(
+	void (*impl) (const int, const Cell[], Cell[], const int),
+	Cell start[],
+	Cell reference[],
+	Cell alternative[],
+	const int n,
+	const int rule = 102
+) {
+	for (int i = 0; i < n; ++i) {
+		start[i] = std::rand() % 2;
+	}
 
-		compute_new_line_reference(n, start.data(), reference.data(), rule);
-		impl(n, start.data(), alternative.data(), rule);
+	compute_new_line_reference(n, start, reference, rule);
+	impl(n, start, alternative, rule);
 
-		for (int i = 0; i < size; ++i) {
-			if (reference[i] != alternative[i]) {
-				std::cerr << "Found error when size = " << n << std::endl;
-				return false;
-			}
+	for (int i = 0; i < n; ++i) {
+		if (reference[i] != alternative[i]) {
+			return false;
 		}
 	}
 
 	return true;
+}
+
+
+bool test_suite(
+	void (*impl) (const int, const Cell[], Cell[], const int),
+	const std::string &name
+) {
+	bool has_failed_some_test = false;
+
+	for (int n = 3; n < size; ++n) {
+		for (int i = 0; i < n; ++i) {
+			alternative[i] = -1;
+		}
+
+		if (false == single_test_case(impl, start, reference, alternative, n)) {
+			has_failed_some_test = true;
+			std::cerr << "ERROR (" << name << "): failed test case when n = " << n << std::endl;
+		}
+	}
+
+	return not has_failed_some_test;
 }
 
 
