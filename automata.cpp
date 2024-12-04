@@ -1,4 +1,5 @@
 #include <cmath>
+#include <experimental/simd>
 #include "automata.hpp"
 
 
@@ -143,6 +144,51 @@ void compute_new_line_packed(const int n, const Cell above[], Cell below[], cons
 		}
 
 		left = vector >> (LANE_WIDTH - 8);
+	}
+
+	// at this point we are on a cell with a sure left neighbour
+	// we simply copy an existing implementation
+	Cell local[3] = {static_cast<Cell>(left), above[i], 0};
+
+	for (; i < n-1; ++i) {
+		local[2] = above[i+1];
+
+		number = 4*local[0] + 2*local[1] + 1*local[2];
+		below[i] = (rule >> number) % 2;
+
+		local[0] = local[1];
+		local[1] = local[2];
+	}
+
+	number = 4*local[0] + 2*local[1];
+	below[n-1] = (rule >> number) % 2;
+}
+
+
+void compute_new_line_simd(const int n, const Cell above[], Cell below[], const int rule) {
+	using simd_t = std::experimental::native_simd<Cell>;
+	simd_t vector, lshift, rshift, acc;
+	simd_t rule_extended = static_cast<Cell>(rule);
+
+	constexpr int SIZEOF = vector.size();
+	int i, number;
+	Cell left = 0, right;
+
+	for (i = 0; i+SIZEOF < n; i += SIZEOF) {
+		vector.copy_from(above + i, std::experimental::vector_aligned);
+		right = above[i+SIZEOF];
+
+		lshift = simd_t([vector](int i) {return vector[(i+1) % 16];});
+		lshift[0] = left;
+
+		rshift = simd_t([vector](int i) {return vector[(i-1) % 16];});
+		rshift[SIZEOF-1] = right;
+
+		acc = 4*lshift + 2*vector + rshift;
+		acc = (rule_extended >> acc) % 2;
+
+		acc.copy_to(below + i, std::experimental::vector_aligned);
+		left = vector[SIZEOF - 1];
 	}
 
 	// at this point we are on a cell with a sure left neighbour

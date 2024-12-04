@@ -71,6 +71,7 @@ int main() {
 	TEST_IMPLEMENTATION(compute_new_line_full_reuse);
 	TEST_IMPLEMENTATION(compute_new_line_packed<int32_t>);
 	TEST_IMPLEMENTATION(compute_new_line_packed<int64_t>);
+	TEST_IMPLEMENTATION(compute_new_line_simd);
 
 	return 0;
 }

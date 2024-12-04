@@ -1,7 +1,7 @@
-CXX      = g++
+CXX      = g++ -std=c++20
 PYTHON   = python3
 WARNINGS = -Wall -Wextra -Wpedantic
-OPT      = -O3 -ftree-vectorize
+OPT      = -O3 -march=native -ftree-vectorize
 
 
 all: test wolf
