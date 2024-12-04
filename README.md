@@ -47,10 +47,12 @@ The first and the second addends can be obtained by rotating the SIMD register (
 
 
 ## Experiments
-SIMD programs compromise on readability and portability (i.e. AVX instructions are only available for x86 architectures). For this reason I decided to use a trick: if the cell state is stored in 8 bits then by using bigger size integers like int32 or int64 we can emulate SIMD add, shift and rotate.
+SIMD programs compromise on readability and portability (i.e. AVX instructions are only available for x86 architectures). For this reason I decided to use a trick: if the cell state is stored in 8 bits then by using bigger size integers like int32 or int64 we can emulate SIMD add, shift and rotate. Future implementations will focus on the x86 target architecture or could also explore existing SIMD libraries for C++.
 Here are the implementations available at `automata.cpp`:
 
   * *corner cases*: performs convolution on the inner cells, manually sets the extremal cells
   * *reuse*: does only one memory read per iteration, shuffles the overlapped data into a local array
   * *full reuse*: like reuse but unrolls the loop to remove local array shuffling
   * *packed*: packs cells into a bigger integer, performs SIMD-like operations
+
+![plot](./img/automata/speedup.png)
