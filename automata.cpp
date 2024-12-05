@@ -120,6 +120,7 @@ void compute_new_line_full_reuse(const int n, const Cell above[], Cell below[], 
 }
 
 
+// packed implementations are not worth investigating further because they have to serialize the `(rule >> number) % 2` operation
 template <typename Integer>
 void compute_new_line_packed(const int n, const Cell above[], Cell below[], const int rule) {
 	constexpr int SIZEOF = sizeof(Integer);
@@ -175,9 +176,11 @@ void compute_new_line_simd(const int n, const Cell above[], Cell below[], const 
 	Cell left = 0, right;
 
 	for (i = 0; i+SIZEOF < n; i += SIZEOF) {
+		// uncertain about `vector_aligned` flag or `element_aligned`
 		vector.copy_from(above + i, std::experimental::vector_aligned);
 		right = above[i+SIZEOF];
 
+		// had to use `i+SIZEOF-1` instead of `i-1` because the modulus of a negative number is strange
 		lshift = simd_t([vector](int i) {return vector[(i+SIZEOF-1) % SIZEOF];});
 		lshift[0] = left;
 
@@ -185,6 +188,9 @@ void compute_new_line_simd(const int n, const Cell above[], Cell below[], const 
 		rshift[SIZEOF-1] = right;
 
 		acc = 4*lshift + 2*vector + rshift;
+
+		// this operation was buggy only for some rules: it wrote -1 instead of 1
+		// I think that the arithmetic shift was the cause, and enforcing Cell to be uint8_t solved the problem
 		acc = (rule_extended >> acc) % 2;
 
 		acc.copy_to(below + i, std::experimental::vector_aligned);
@@ -194,7 +200,7 @@ void compute_new_line_simd(const int n, const Cell above[], Cell below[], const 
 
 	// at this point we are on a cell with a sure left neighbour
 	// we simply copy an existing implementation
-	Cell local[3] = {static_cast<Cell>(left), above[i], 0};
+	Cell local[3] = {left, above[i], 0};
 
 	for (; i < n-1; ++i) {
 		local[2] = above[i+1];
