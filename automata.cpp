@@ -178,16 +178,17 @@ void compute_new_line_simd(const int n, const Cell above[], Cell below[], const 
 		vector.copy_from(above + i, std::experimental::vector_aligned);
 		right = above[i+SIZEOF];
 
-		lshift = simd_t([vector](int i) {return vector[(i+1) % SIZEOF];});
+		lshift = simd_t([vector](int i) {return vector[(i+SIZEOF-1) % SIZEOF];});
 		lshift[0] = left;
 
-		rshift = simd_t([vector](int i) {return vector[(i-1) % SIZEOF];});
+		rshift = simd_t([vector](int i) {return vector[(i+1) % SIZEOF];});
 		rshift[SIZEOF-1] = right;
 
 		acc = 4*lshift + 2*vector + rshift;
 		acc = (rule_extended >> acc) % 2;
 
 		acc.copy_to(below + i, std::experimental::vector_aligned);
+
 		left = vector[SIZEOF - 1];
 	}
 
