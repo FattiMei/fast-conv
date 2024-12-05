@@ -2,6 +2,9 @@
 #define __AUTOMATA_HPP__
 
 
+#include <cstdint>
+
+
 // `compute_new_line_simd` relies on the Cell type to be an unsigned, 8-bit integer
 using Cell = uint8_t;
 

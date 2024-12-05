@@ -177,7 +177,7 @@ void compute_new_line_simd(const int n, const Cell above[], Cell below[], const 
 
 	for (i = 0; i+SIZEOF < n; i += SIZEOF) {
 		// uncertain about `vector_aligned` flag or `element_aligned`
-		vector.copy_from(above + i, std::experimental::vector_aligned);
+		vector.copy_from(above + i, std::experimental::element_aligned);
 		right = above[i+SIZEOF];
 
 		// had to use `i+SIZEOF-1` instead of `i-1` because the modulus of a negative number is strange
@@ -193,7 +193,7 @@ void compute_new_line_simd(const int n, const Cell above[], Cell below[], const 
 		// I think that the arithmetic shift was the cause, and enforcing Cell to be uint8_t solved the problem
 		acc = (rule_extended >> acc) % 2;
 
-		acc.copy_to(below + i, std::experimental::vector_aligned);
+		acc.copy_to(below + i, std::experimental::element_aligned);
 
 		left = vector[SIZEOF - 1];
 	}
