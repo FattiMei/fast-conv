@@ -1,5 +1,4 @@
 #include <cmath>
-#include <experimental/simd>
 #include "automata.hpp"
 
 
@@ -166,6 +165,10 @@ void compute_new_line_packed(const int n, const Cell above[], Cell below[], cons
 }
 
 
+#if COMPILER_SUPPORTS_EXPERIMENTAL_SIMD
+
+#include <experimental/simd>
+
 void compute_new_line_simd(const int n, const Cell above[], Cell below[], const int rule) {
 	using simd_t = std::experimental::native_simd<Cell>;
 	simd_t vector, lshift, rshift, acc;
@@ -215,6 +218,7 @@ void compute_new_line_simd(const int n, const Cell above[], Cell below[], const 
 	number = 4*local[0] + 2*local[1];
 	below[n-1] = (rule >> number) % 2;
 }
+#endif
 
 
 template void compute_new_line_packed<int32_t>(const int, const Cell[], Cell[], const int);

@@ -16,6 +16,9 @@ void compute_new_line_reuse            (const int n, const Cell above[], Cell be
 void compute_new_line_full_reuse       (const int n, const Cell above[], Cell below[], const int rule);
 void compute_new_line_reuse_lower_bound(const int n, const Cell above[], Cell below[], const int rule);
 void compute_new_line_packed           (const int n, const Cell above[], Cell below[], const int rule);
+
+
+// ADVICE: should I include conditionally the prototype of the function?
 void compute_new_line_simd             (const int n, const Cell above[], Cell below[], const int rule);
 
 

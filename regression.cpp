@@ -1,5 +1,3 @@
-#include <vector>
-#include <cstdlib>
 #include <cassert>
 #include <iostream>
 #include "automata.hpp"
@@ -8,7 +6,7 @@
 #define TEST_IMPLEMENTATION(foo) assert(test_suite(foo, #foo))
 
 
-constexpr int size = 100;
+constexpr int size = 1000;
 constexpr int rule = 103;
 
 
@@ -92,7 +90,10 @@ int main() {
 	TEST_IMPLEMENTATION(compute_new_line_full_reuse);
 	TEST_IMPLEMENTATION(compute_new_line_packed<int32_t>);
 	TEST_IMPLEMENTATION(compute_new_line_packed<int64_t>);
+
+#if COMPILER_SUPPORTS_EXPERIMENTAL_SIMD
 	TEST_IMPLEMENTATION(compute_new_line_simd);
+#endif
 
 	return 0;
 }
