@@ -56,4 +56,4 @@ Here are the implementations available at `automata.cpp`:
   * *packed*: packs cells into a bigger integer, performs SIMD-like operations
   * *simd*: same as packed but with experimental SIMD constructs
 
-![plot](./img/automata/speedup.png)
+![plot](./img/intel_laptop_speedup.png)
