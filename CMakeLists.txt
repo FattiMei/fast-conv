@@ -16,11 +16,16 @@ if (NOT DEFINED COMPILE_SIMD)
 	try_compile(COMPILE_SIMD ${CMAKE_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/cmake/simd.cpp)
 
 	if (COMPILE_SIMD)
-		add_definitions(-DCOMPILER_SUPPORTS_EXPERIMENTAL_SIMD)
 		message(STATUS "Checking compiler for experimental simd support -- ok")
 	else()
 		message(STATUS "Checking compiler for experimental simd support -- not supported, some features will be ignored")
 	endif()
+endif()
+
+
+# ASSESS: I need to add the new definition in this scope and not just once after the testing at line 19, right?
+if (COMPILE_SIMD)
+	add_compile_definitions(COMPILER_SUPPORTS_EXPERIMENTAL_SIMD)
 endif()
 
 
@@ -29,19 +34,19 @@ find_package(benchmark REQUIRED)
 
 
 # automata.cpp is compiled into a static library because multiple targets need it and I don't want to recompile it every time
-add_library(automata STATIC automata.cpp)
+add_library(automata STATIC src/automata.cpp)
 
 
-add_executable(wolf main.cpp)
+add_executable(wolf src/main.cpp)
 target_link_libraries(wolf PRIVATE automata)
 
 
-add_executable(regression regression.cpp)
+add_executable(regression src/regression.cpp)
 target_link_libraries(regression PRIVATE automata)
 
 
 if (benchmark_FOUND)
-	add_executable(benchmark bench.cpp)
+	add_executable(benchmark src/bench.cpp)
 	target_link_libraries(benchmark
 		PRIVATE automata
 		PRIVATE benchmark::benchmark
@@ -56,6 +61,6 @@ if (benchmark_FOUND)
 	add_custom_target(
 		bench
 		DEPENDS report.json
-		COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/plot.py report.json
+		COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/plot.py report.json
 	)
 endif ()

@@ -28,7 +28,7 @@ BENCHMARK_TEMPLATE(BM_automata_step, compute_new_line_full_reuse     )->RangeMul
 BENCHMARK_TEMPLATE(BM_automata_step, compute_new_line_packed<int32_t>)->RangeMultiplier(2)->Range(64, 1<<20);
 BENCHMARK_TEMPLATE(BM_automata_step, compute_new_line_packed<int64_t>)->RangeMultiplier(2)->Range(64, 1<<20);
 
-#if COMPILER_SUPPORTS_EXPERIMENTAL_SIMD
+#ifdef COMPILER_SUPPORTS_EXPERIMENTAL_SIMD
 BENCHMARK_TEMPLATE(BM_automata_step, compute_new_line_simd           )->RangeMultiplier(2)->Range(64, 1<<20);
 #endif
 

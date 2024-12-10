@@ -165,7 +165,7 @@ void compute_new_line_packed(const int n, const Cell above[], Cell below[], cons
 }
 
 
-#if COMPILER_SUPPORTS_EXPERIMENTAL_SIMD
+#ifdef COMPILER_SUPPORTS_EXPERIMENTAL_SIMD
 
 #include <experimental/simd>
 

@@ -91,7 +91,7 @@ int main() {
 	TEST_IMPLEMENTATION(compute_new_line_packed<int32_t>);
 	TEST_IMPLEMENTATION(compute_new_line_packed<int64_t>);
 
-#if COMPILER_SUPPORTS_EXPERIMENTAL_SIMD
+#ifdef COMPILER_SUPPORTS_EXPERIMENTAL_SIMD
 	TEST_IMPLEMENTATION(compute_new_line_simd);
 #endif
 
